@@ -17,8 +17,7 @@ class BooksSerializer(ModelSerializer):
     price_with_discount = serializers.DecimalField(max_digits=7,
                                                    decimal_places=2,
                                                    read_only=True)
-    owner_name = serializers.CharField(source='owner.username', default='',
-                                       read_only=True)
+    owner_name = serializers.CharField(read_only=True)
     readers = BookReaderSerializer(many=True, read_only=True)
 
     class Meta:
