@@ -11,6 +11,8 @@ class Book(models.Model):
     discount = models.DecimalField(max_digits=3, decimal_places=1, null=True)
     readers = models.ManyToManyField(User, through='UserBookRelation',
                                      related_name='books')
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None,
+                                 null=True)
 
     def __str__(self):
         return f'Id {self.id}: {self.name}'
@@ -32,3 +34,18 @@ class UserBookRelation(models.Model):
 
     def __str__(self):
         return f'{self.user.username}: {self.book.name}, RATE {self.rate}'
+
+    def __init__(self, *args, **kwargs):
+        super(UserBookRelation, self).__init__(*args, **kwargs)
+
+        self.old_rate = self.rate
+
+    def save(self, *args, **kwargs):
+        from store.logic import set_rating
+
+        creating = not self.pk
+
+        super().save(*args, **kwargs)
+
+        if self.old_rate != self.rate or creating:
+            set_rating(self.book)
